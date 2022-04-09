@@ -1,0 +1,19 @@
+{
+	"files.associations": {
+		"config": "txt",
+		"hash_map": "c",
+		"bitset": "c",
+		"chrono": "c",
+		"algorithm": "c",
+		"sstream": "c",
+		"time.h": "c",
+		"typeindex": "c",
+		"typeinfo": "c",
+		"functional": "c",
+		"array": "c",
+		"string_view": "c",
+		"initializer_list": "c",
+		"utility": "c",
+		"valarray": "c"
+	}
+}
