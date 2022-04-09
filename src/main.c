@@ -37,7 +37,7 @@ char* get_from_plugin(const char* plugin_name, plugin_function what, const char*
 	
 	error_msg = dlerror();
 	if(error_msg) {
-		fprintf(stderr, "[ERROR] - %s: %s\n", what, error_msg);
+		fprintf(stderr, "[ERROR] - %s: %s\n", (what == INFO)? "get_info":"get_name", error_msg);
 		goto error;
 	}
 
@@ -118,7 +118,7 @@ int print_menu(char** plugins, size_t amount) {
 			return 0;
 		}
 
-		printf("%d - Get info from '%s'\n", i+1, plugin_name);
+		printf("%ld - Get info from '%s'\n", i+1, plugin_name);
 		free(plugin_name);
 	}
 	puts("0 - Exit");
