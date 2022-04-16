@@ -81,23 +81,27 @@ size_t get_total_plugins() {
 }
 /* ----------------------------------------------------------------------------------- */
 int get_plugins(char** plugins, size_t amount) {
-	char* folder = PLUGINS_FOLDER;
-	size_t f_size = strlen(folder);
+	const char* folder = PLUGINS_FOLDER;
+	size_t f_size = sizeof(PLUGINS_FOLDER); //
 
 	DIR *dir;
 	struct dirent *file;
 
-	dir = opendir(PLUGINS_FOLDER);
+	dir = opendir(folder);
 	if(!dir) {
-		return 0;
+		fprintf(stderr, "[ERROR] - Can not open folder %s\n.", folder);
+		goto error;
 	}
 
 	for(size_t i = 0; (file = readdir(dir)) != NULL && i < amount; ) {
 		if(PLUGINS_CHECK(file)) {
 			size_t fn_size = strlen(file->d_name);
 
-			plugins[i] = (char*) calloc(f_size + fn_size + 1, sizeof(char));
-			if(!plugins[i]) return 0;
+			plugins[i] = (char*) calloc(f_size + fn_size, sizeof(char));
+			if(!plugins[i]) {
+				fprintf(stderr, "[ERROR] - Not enough memory to create a new string of size %zu\n.", f_size + fn_size);
+				goto error;
+			}
 
 			strncpy(plugins[i], folder, f_size);
 			strncat(plugins[i], file->d_name, fn_size);
@@ -108,6 +112,12 @@ int get_plugins(char** plugins, size_t amount) {
 
 	closedir(dir);
 	return 1;
+
+error:
+	if(dir) {
+		closedir(dir);
+	}
+	return 0;
 }
 /* ----------------------------------------------------------------------------------- */
 int print_menu(char** plugins, size_t amount) {
@@ -118,7 +128,7 @@ int print_menu(char** plugins, size_t amount) {
 			return 0;
 		}
 
-		printf("%ld - Get info from '%s'\n", i+1, plugin_name);
+		printf("%zu - Get info from '%s'\n", i+1, plugin_name);
 		free(plugin_name);
 	}
 	puts("0 - Exit");
@@ -145,11 +155,12 @@ int main_loop(char** plugins, size_t amount) {
 		if(!info) {
 			char* plugin_name = get_from_plugin(plugins[input - 1], NAME, NULL);
 			if(!plugin_name) {
-				return 0;
+				fprintf(stderr, "[ERROR] - Could not get name from plugin %d.\n", input);
+				goto error;
 			}
 			fprintf(stderr, "[ERROR] - get_info from %s did not work as expected.\n", plugin_name);
 			free(plugin_name);
-			return 0;
+			goto error;
 		}
 
 		puts("---------------------------------------");
@@ -160,6 +171,9 @@ int main_loop(char** plugins, size_t amount) {
 	}
 
 	return 1;
+
+error:
+	return 0;
 }
 /* ----------------------------------------------------------------------------------- */
 int main() {
@@ -179,6 +193,7 @@ int main() {
 	}
 
 	//main
+	fprintf(stdout, "[DATA-PLUG]\n");
 	if(!main_loop(plugins, total_plugins)) {
 		goto error;
 	}
